@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>International Programmers' Day Celebration</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            z-index: 2; /* Ensure text is above the canvas */
+        }
+
+        @keyframes pulse {
+            0% {
+                color: #00ff2aa9;
+                text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+            }
+            50% {
+                color: #f0f;
+                text-shadow: 0 0 40px rgba(255, 0, 255, 1);
+            }
+            100% {
+                color: #ff0000;
+                text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        .message.show {
+            opacity: 1;
+            animation: pulse 1s infinite;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="message">Happy International Programmers' Day!</div>
+    <canvas id="confettiCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        const colors = ['#ffeb3b', '#ff5722', '#4caf50', '#2196f3', '#9c27b0'];
+
+        function createParticle(x, y) {
+            const speed = Math.random() * 5 + 4;
+            const angle = Math.random() * 2 * Math.PI;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            particles.push({ x, y, speed, angle, color, size: Math.random() * 4 + 5 });
+        }
+
+        function updateParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += Math.cos(p.angle) * p.speed;
+                p.y += Math.sin(p.angle) * p.speed;
+                p.size *= 0.96;
+                if (p.size < 0.5 || p.x < 0 || p.x > canvas.width || p.y < 0 || p.y > canvas.height) {
+                    particles.splice(i, 1);
+                }
+            }
+        }
+
+        function drawParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (const p of particles) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, 2 * Math.PI);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            }
+        }
+
+        function animateParticles() {
+            if (particles.length < 400) {
+                for (let i = 0; i < 10; i++) {
+                    createParticle(Math.random() * canvas.width, Math.random() * canvas.height);
+                }
+            }
+            updateParticles();
+            drawParticles();
+            requestAnimationFrame(animateParticles);
+        }
+
+        function initialConfettiEffect() {
+            // Trigger initial confetti effect for 3 seconds
+            const endTime = Date.now() + 3000; // 3 seconds
+            function animate() {
+                if (Date.now() < endTime) {
+                    createParticle(Math.random() * canvas.width, Math.random() * canvas.height);
+                    requestAnimationFrame(animate);
+                }
+            }
+            animate();
+            setTimeout(() => {
+                particles = []; // Clear particles after initial effect
+            }, 3000); // Clear particles after 3 seconds
+        }
+
+        function triggerConfetti() {
+            // Trigger regular confetti effect
+            for (let i = 0; i < 100; i++) {
+                createParticle(Math.random() * canvas.width, Math.random() * canvas.height);
+            }
+            animateParticles();
+        }
+
+        function showText() {
+            const textElement = document.querySelector('.message');
+            textElement.classList.add('show');
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initialConfettiEffect(); // Initial confetti effect
+            setTimeout(() => {
+                triggerConfetti(); // Regular confetti effect after initial
+                setTimeout(showText, 1000); // Show text after regular confetti effect
+            }, 0); // Start regular confetti effect after 3 seconds
+        });
+    </script>
+</body>
+</html>
